@@ -130,10 +130,10 @@ int main() {
     //player with a bye. Then the highest player with a bye plays that play that just lost a matchup. If this doesn't work, it increments
     //to check 2 ranks above, and repeats until it finds a valid pairing swap.
     int totalByes = 2;
-    int highestRankWithBye = rankedPlayers.size() + 1;
-    int secondHighestRankWithBye = rankedPlayers.size() + 1;
     while(totalByes >= 2) {
         totalByes = 0;
+        int highestRankWithBye = rankedPlayers.size() + 1;
+        int secondHighestRankWithBye = rankedPlayers.size() + 1;
         for(std::vector<std::string> pairing : pairings) {
             if(pairing.size() != 3) {
                 totalByes += 3 - pairing.size();
