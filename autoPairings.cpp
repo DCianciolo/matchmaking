@@ -33,9 +33,8 @@ int getPlayerIndex(std::vector<std::vector<std::string>> playersVec, std::string
 
 int main() {
     //Input your database file and any previous pairing files here. MUST BE .TSV, NOT .CSV
-    std::string rankFile = "S8 - League Database - Resume.tsv";
-    std::vector<std::string>  previousPairings = {"S8 - League Database - W1Pairings.tsv", "S8 - League Database - W2Pairings.tsv", "S8 - League Database - W3Pairings.tsv"};
-
+    std::string rankFile = "S9 - League Database - Resume.tsv";
+    std::vector<std::string>  previousPairings = {"S9 - League Database - W1Pairings.tsv", "S9 - League Database - W2Pairings.tsv", "S9 - League Database - W3Pairings.tsv"};
     //Setting up variables
     std::vector<std::vector<std::string>> unrankedPlayers;
     std::fstream playerStream;
@@ -80,7 +79,6 @@ int main() {
     for(int i = 0; i < numPlayers; i++) {
         oldPairings.push_back({});
     }
-
     //Adds in all previous pairings, by adding names into the oldpairings vector at whatever index that the player's rank is in
     for(std::string sheet : previousPairings) {
         std::fstream pairingStream;
@@ -131,9 +129,9 @@ int main() {
     //to check 2 ranks above, and repeats until it finds a valid pairing swap.
     int totalByes = 2;
     while(totalByes >= 2) {
-        totalByes = 0;
         int highestRankWithBye = rankedPlayers.size() + 1;
         int secondHighestRankWithBye = rankedPlayers.size() + 1;
+        totalByes = 0;
         for(std::vector<std::string> pairing : pairings) {
             if(pairing.size() != 3) {
                 totalByes += 3 - pairing.size();
@@ -149,48 +147,86 @@ int main() {
         int numToSubtract = 1;
         bool matchesFound = false;
         if(totalByes >= 2) {
-            while(!matchesFound) {
-                std::string highestPlayerWithBye = rankedPlayers.at(highestRankWithBye).at(1);
-                std::string secondHighestPlayerWithBye = rankedPlayers.at(secondHighestRankWithBye).at(1);
-                std::string nextHighestPlayer = rankedPlayers.at(highestRankWithBye - numToSubtract).at(1);
-                int highestByeIndex = getPlayerIndex(rankedPlayers, highestPlayerWithBye);
-                int nextHighestIndex = highestByeIndex - numToSubtract;
-                int secondHighestByeIndex = getPlayerIndex(rankedPlayers, secondHighestPlayerWithBye);
-                int lowestMatchupRank = 0;
-                for(std::string matchup : pairings.at(nextHighestIndex)) {
-                    int rank = getPlayerIndex(rankedPlayers, matchup);
-                    if(rank > lowestMatchupRank) {
-                        lowestMatchupRank = rank;
+            if(secondHighestRankWithBye < rankedPlayers.size()) {
+                while(!matchesFound) {
+                    std::string highestPlayerWithBye = rankedPlayers.at(highestRankWithBye).at(1);
+                    std::string secondHighestPlayerWithBye = rankedPlayers.at(secondHighestRankWithBye).at(1);
+                    std::string nextHighestPlayer = rankedPlayers.at(highestRankWithBye - numToSubtract).at(1);
+                    int highestByeIndex = getPlayerIndex(rankedPlayers, highestPlayerWithBye);
+                    int nextHighestIndex = highestByeIndex - numToSubtract;
+                    int secondHighestByeIndex = getPlayerIndex(rankedPlayers, secondHighestPlayerWithBye);
+                    int lowestMatchupRank = 0;
+                    for(std::string matchup : pairings.at(nextHighestIndex)) {
+                        int rank = getPlayerIndex(rankedPlayers, matchup);
+                        if(rank > lowestMatchupRank) {
+                            lowestMatchupRank = rank;
+                        }
                     }
-                }
-                std::string lowestMatchup = rankedPlayers.at(lowestMatchupRank).at(1);
-                if(std::find(oldPairings.at(highestByeIndex).begin(), oldPairings.at(highestByeIndex).end(), nextHighestPlayer) == oldPairings.at(highestByeIndex).end() && std::find(oldPairings.at(secondHighestByeIndex).begin(), oldPairings.at(secondHighestByeIndex).end(), lowestMatchup) == oldPairings.at(secondHighestByeIndex).end()) {
-                    if(std::find(pairings.at(nextHighestIndex).begin(), pairings.at(nextHighestIndex).end(), highestPlayerWithBye) == pairings.at(nextHighestIndex).end() && std::find(pairings.at(secondHighestByeIndex).begin(), pairings.at(secondHighestByeIndex).end(), lowestMatchup) == pairings.at(secondHighestByeIndex).end()) {
-                        int matchupIndex = std::find(pairings.at(nextHighestIndex).begin(), pairings.at(nextHighestIndex).end(), lowestMatchup) - pairings.at(nextHighestIndex).begin();
-                        pairings.at(nextHighestIndex).erase(pairings.at(nextHighestIndex).begin() + matchupIndex);
-                        int matchupIndex2 = std::find(pairings.at(lowestMatchupRank).begin(), pairings.at(lowestMatchupRank).end(), nextHighestPlayer) - pairings.at(lowestMatchupRank).begin();
-                        pairings.at(lowestMatchupRank).erase(pairings.at(lowestMatchupRank).begin() + matchupIndex2);
-                        pairings.at(highestByeIndex).push_back(nextHighestPlayer);
-                        pairings.at(nextHighestIndex).push_back(highestPlayerWithBye);
-                        pairings.at(secondHighestByeIndex).push_back(lowestMatchup);
-                        pairings.at(lowestMatchupRank).push_back(secondHighestPlayerWithBye);
-                        totalByes = totalByes - 2;
-                        matchesFound = true;
+                    std::string lowestMatchup = rankedPlayers.at(lowestMatchupRank).at(1);
+                    if(std::find(oldPairings.at(highestByeIndex).begin(), oldPairings.at(highestByeIndex).end(), nextHighestPlayer) == oldPairings.at(highestByeIndex).end() && std::find(oldPairings.at(secondHighestByeIndex).begin(), oldPairings.at(secondHighestByeIndex).end(), lowestMatchup) == oldPairings.at(secondHighestByeIndex).end()) {
+                        if(std::find(pairings.at(nextHighestIndex).begin(), pairings.at(nextHighestIndex).end(), highestPlayerWithBye) == pairings.at(nextHighestIndex).end() && std::find(pairings.at(secondHighestByeIndex).begin(), pairings.at(secondHighestByeIndex).end(), lowestMatchup) == pairings.at(secondHighestByeIndex).end()) {
+                            int matchupIndex = std::find(pairings.at(nextHighestIndex).begin(), pairings.at(nextHighestIndex).end(), lowestMatchup) - pairings.at(nextHighestIndex).begin();
+                            pairings.at(nextHighestIndex).erase(pairings.at(nextHighestIndex).begin() + matchupIndex);
+                            int matchupIndex2 = std::find(pairings.at(lowestMatchupRank).begin(), pairings.at(lowestMatchupRank).end(), nextHighestPlayer) - pairings.at(lowestMatchupRank).begin();
+                            pairings.at(lowestMatchupRank).erase(pairings.at(lowestMatchupRank).begin() + matchupIndex2);
+                            pairings.at(highestByeIndex).push_back(nextHighestPlayer);
+                            pairings.at(nextHighestIndex).push_back(highestPlayerWithBye);
+                            pairings.at(secondHighestByeIndex).push_back(lowestMatchup);
+                            pairings.at(lowestMatchupRank).push_back(secondHighestPlayerWithBye);
+                            totalByes = totalByes - 2;
+                            matchesFound = true;
+                        }
+                        else {
+                            numToSubtract++;
+                        }
                     }
                     else {
                         numToSubtract++;
                     }
                 }
-                else {
-                    numToSubtract++;
+            }
+            else {
+                while(!matchesFound) {
+                    std::string highestPlayerWithBye = rankedPlayers.at(highestRankWithBye).at(1);
+                    std::string nextHighestPlayer = rankedPlayers.at(highestRankWithBye - numToSubtract).at(1);
+                    int highestByeIndex = getPlayerIndex(rankedPlayers, highestPlayerWithBye);
+                    int nextHighestIndex = highestByeIndex - numToSubtract;
+                    int lowestMatchupRank = 0;
+                    for(std::string matchup : pairings.at(nextHighestIndex)) {
+                        int rank = getPlayerIndex(rankedPlayers, matchup);
+                        if(rank > lowestMatchupRank) {
+                            lowestMatchupRank = rank;
+                        }
+                    }
+                    std::string lowestMatchup = rankedPlayers.at(lowestMatchupRank).at(1);
+                    if(std::find(oldPairings.at(highestByeIndex).begin(), oldPairings.at(highestByeIndex).end(), nextHighestPlayer) == oldPairings.at(highestByeIndex).end() && std::find(oldPairings.at(highestByeIndex).begin(), oldPairings.at(highestByeIndex).end(), lowestMatchup) == oldPairings.at(highestByeIndex).end()) {
+                        if(std::find(pairings.at(nextHighestIndex).begin(), pairings.at(nextHighestIndex).end(), highestPlayerWithBye) == pairings.at(nextHighestIndex).end() && std::find(pairings.at(lowestMatchupRank).begin(), pairings.at(lowestMatchupRank).end(), highestPlayerWithBye) == pairings.at(lowestMatchupRank).end()) {
+                            int matchupIndex = std::find(pairings.at(nextHighestIndex).begin(), pairings.at(nextHighestIndex).end(), lowestMatchup) - pairings.at(nextHighestIndex).begin();
+                            pairings.at(nextHighestIndex).erase(pairings.at(nextHighestIndex).begin() + matchupIndex);
+                            int matchupIndex2 = std::find(pairings.at(lowestMatchupRank).begin(), pairings.at(lowestMatchupRank).end(), nextHighestPlayer) - pairings.at(lowestMatchupRank).begin();
+                            pairings.at(lowestMatchupRank).erase(pairings.at(lowestMatchupRank).begin() + matchupIndex2);
+                            pairings.at(highestByeIndex).push_back(nextHighestPlayer);
+                            pairings.at(nextHighestIndex).push_back(highestPlayerWithBye);
+                            pairings.at(lowestMatchupRank).push_back(highestPlayerWithBye);
+                            pairings.at(highestByeIndex).push_back(lowestMatchup);
+                            totalByes = totalByes - 2;
+                            matchesFound = true;
+                        }
+                        else {
+                            numToSubtract++;
+                        }
+                    }
+                    else {
+                        numToSubtract++;
+                    }
                 }
             }
         }
     }
-
+    
     //Writes pairings to .csv file
     std::ofstream outputSheet;
-    outputSheet.open("pairings.csv");
+    outputSheet.open("pairings2.csv");
 
     for(std::vector<std::string> playerVec : rankedPlayers) {
         std::string playerName = playerVec.at(1);
