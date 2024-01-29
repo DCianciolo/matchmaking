@@ -34,7 +34,7 @@ int getPlayerIndex(std::vector<std::vector<std::string>> playersVec, std::string
 int main() {
     //Input your database file and any previous pairing files here. MUST BE .TSV, NOT .CSV
     std::string rankFile = "S11 - League Database - Resume.tsv";
-    std::vector<std::string>  previousPairings = {};
+    std::vector<std::string>  previousPairings = {"S11 - League Database - W1Pairings.tsv", "S11 - League Database - W2Pairings.tsv"};
     //Setting up variables
     std::vector<std::vector<std::string>> unrankedPlayers;
     std::fstream playerStream;
@@ -51,7 +51,7 @@ int main() {
         num = 29;
         numToAdd = 1;
     }
-
+    //std::cout << "0" << std::endl;
     //Reads in the spreadsheet
     int linenum = 0;
     while(getline(playerStream, line)) {
@@ -75,7 +75,7 @@ int main() {
         }
         linenum++;
     }
-
+    //std::cout << "1" << std::endl;
     //Sorts players by rank, if they aren't already
     std::vector<std::vector<std::string>> rankedPlayers = sortPlayers(unrankedPlayers);
 
@@ -128,6 +128,13 @@ int main() {
         }
     }
 
+    /*for(std::vector<std::string> pairing : pairings) {
+        std::cout << "new pairings vector" << std::endl;
+        for(std::string player : pairing) {
+            std::cout << player << std::endl;
+        }
+    }*/
+
     //Convoluted code to fix byes
     //Checks the next lowest player above the first player with a bye; if possible, takes their lowest matchup and gives it to the second
     //player with a bye. Then the highest player with a bye plays that play that just lost a matchup. If this doesn't work, it increments
@@ -137,18 +144,20 @@ int main() {
         int highestRankWithBye = rankedPlayers.size() + 1;
         int secondHighestRankWithBye = rankedPlayers.size() + 1;
         totalByes = 0;
-        for(std::vector<std::string> pairing : pairings) {
-            if(pairing.size() != 3) {
-                totalByes += 3 - pairing.size();
-                if(std::find(pairings.begin(), pairings.end(), pairing) - pairings.begin() < highestRankWithBye) {
+        for(int i = 0; i < pairings.size(); i++) {
+            if(pairings.at(i).size() != 3) {
+                totalByes += 3 - pairings.at(i).size();
+                if(i < highestRankWithBye) {
                     secondHighestRankWithBye = highestRankWithBye;
-                    highestRankWithBye = std::find(pairings.begin(), pairings.end(), pairing) - pairings.begin();
+                    highestRankWithBye = i;
                 }
-                else if(std::find(pairings.begin(), pairings.end(), pairing) - pairings.begin() < secondHighestRankWithBye) {
-                    secondHighestRankWithBye = std::find(pairings.begin(), pairings.end(), pairing) - pairings.begin();
+                else if(i < secondHighestRankWithBye) {
+                    secondHighestRankWithBye = i;
                 }
             }
         }
+        //std::cout << highestRankWithBye << std::endl;
+        //std::cout << secondHighestRankWithBye << std::endl;
         int numToSubtract = 1;
         bool matchesFound = false;
         if(totalByes >= 2) {
@@ -227,6 +236,13 @@ int main() {
                 }
             }
         }
+        /*std::cout << totalByes << std::endl;
+        for(std::vector<std::string> pairing : pairings) {
+            std::cout << "new pairings vector" << std::endl;
+            for(std::string player : pairing) {
+                std::cout << player << std::endl;
+            }
+        }*/
     }
     
     //Writes pairings to .csv file
